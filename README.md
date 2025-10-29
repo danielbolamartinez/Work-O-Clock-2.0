@@ -54,77 +54,186 @@ Work O’Clock es una solución para registrar la jornada laboral de los emple
 ### 4.3 Casos de Uso
 ```mermaid
 graph TD
-    Empleado -->|Usa| Login
-    Empleado -->|Usa| Fichar_Entrada
-    Empleado -->|Usa| Fichar_Salida
-    Empleado -->|Usa| Consultar_Historico
+    %% Actores
+    Empleado[Empleado]
+    Administrador[Administrador]
 
-    Administrador -->|Usa| Login
-    Administrador -->|Usa| Consultar_Historico_Global
-    Administrador -->|Usa| Gestionar_Usuarios
+    %% Casos de uso empleados
+    Empleado -->|Usa| LoginEmpleado[Login]
+    Empleado -->|Usa| FicharEntrada[Fichar Entrada]
+    Empleado -->|Usa| FicharSalida[Fichar Salida]
+    Empleado -->|Usa| ConsultarHistorico[Consultar Histórico]
+
+    %% Casos de uso administrador
+    Administrador -->|Usa| LoginAdmin[Login]
+    Administrador -->|Usa| GestionUsuarios[Gestionar Usuarios]
+    Administrador -->|Usa| ConsultarHistoricoGlobal[Consultar Histórico Global]
+
+    %% Flujo condicional
+    LoginEmpleado -->|Incorrecto| ErrorLogin[Login Fallido]
+    LoginAdmin -->|Incorrecto| ErrorLogin
+
 ```
 
 ### 4.4 Diagrama de Clases
 ```mermaid
 classDiagram
-class Usuario {
-  +int id
-  +String nombre
-  +String email
-  +String contraseña_hashed
-  +Rol rol
-  +List~Fichaje~ fichajes
-}
-class Rol {
-  +int id
-  +String nombre_rol
-}
-class Fichaje {
-  +int id
-  +Usuario usuario
-  +String tipo_fichaje
-  +Date fecha_hora
-}
-class Auditoria {
-  +int id
-  +Usuario usuario
-  +String accion
-  +Date fecha_hora
+class Empleado {
+    +int id
+    +String nombre
+    +String apellidos
+    +String email
+    +String contraseña_hashed
+    +Date fecha_alta
+    +Boolean activo
+    +List~Rol~ roles
+    +List~Jornada~ jornadas
+    +List~Fichaje~ fichajes
+    +List~Auditoria~ auditorias
 }
 
-Usuario --> Rol
-Usuario --> Fichaje
-Auditoria --> Usuario
+class Rol {
+    +int id
+    +String nombre
+    +String descripcion
+    +List~Empleado~ empleados
+}
+
+class Empleado_Rol {
+    +int empleado_id
+    +int rol_id
+}
+
+class Jornada {
+    +int id
+    +Empleado empleado
+    +Time hora_inicio
+    +Time hora_fin
+    +String dias_semana
+}
+
+class Fichaje {
+    +int id
+    +Empleado empleado
+    +String tipo
+    +Date fichaje
+    +Float latitud
+    +Float longitud
+}
+
+class Auditoria {
+    +int id
+    +Empleado empleado
+    +String accion
+    +String descripcion
+    +Date fecha
+    +String ip
+}
+
+Empleado --> Fichaje
+Empleado --> Auditoria
+Empleado --> Jornada
+Empleado --> Rol : "muchos a muchos a través de Empleado_Rol"
+Rol --> Empleado_Rol
+Empleado_Rol --> Empleado
+Empleado_Rol --> Rol
+
 ```
 
 ### 4.5 Diagrama de Secuencia: Fichaje
+#### 4.5.1 Login
 ```mermaid
 sequenceDiagram
-participant Frontend
-participant Servidor
-participant BD
+    participant Empleado
+    participant Servidor
+    participant BD
 
-Frontend->>Servidor: POST /api/fichajes {tipo, token}
-Servidor->>BD: Validar usuario y tipo
-BD-->>Servidor: Resultado validación
-Servidor->>BD: Insertar registro fichaje
-BD-->>Servidor: Confirmación
-Servidor-->>Frontend: Respuesta éxito/fallo
-Frontend->>Usuario: Mostrar feedback
+    Empleado->>Servidor: POST /api/login {email, contraseña}
+    Servidor->>BD: Validar credenciales
+    BD-->>Servidor: Resultado validación
+    alt Login correcto
+        Servidor-->>Empleado: 200 OK + JWT
+    else Login incorrecto
+        Servidor-->>Empleado: 401 Unauthorized
+    end
 ```
+#### 4.5.2 Fichaje entrada/salida
+```mermaid
+sequenceDiagram
+    participant Empleado
+    participant Servidor
+    participant BD
+
+    Empleado->>Servidor: POST /api/fichajes {tipo, token, latitud, longitud}
+    Servidor->>BD: Validar token y empleado
+    BD-->>Servidor: Usuario válido
+    Servidor->>BD: Insertar registro fichaje
+    BD-->>Servidor: Confirmación
+    Servidor-->>Empleado: 200 OK / Mensaje de éxito
+```
+#### 4.5.3 Consultar histórico
+```mermaid
+sequenceDiagram
+    participant Empleado
+    participant Servidor
+    participant BD
+
+    Empleado->>Servidor: GET /api/fichajes?filtro={fecha_inicio, fecha_fin}&token
+    Servidor->>BD: Validar token y permisos
+    BD-->>Servidor: Usuario válido
+    Servidor->>BD: Consultar fichajes según filtros
+    BD-->>Servidor: Lista de fichajes
+    Servidor-->>Empleado: 200 OK + datos JSON
+```
+
 
 ### 4.6 Diagrama de Estados: Fichaje
+#### 4.6.1 Empleado
 ```mermaid
-stateDiagram
-[*] --> Desconectado
-Desconectado --> Autenticado : login correcto
-Autenticado --> EsperandoFichaje
-EsperandoFichaje --> FichadoEntrada : fichar entrada
-FichadoEntrada --> EsperandoFichaje : registro correcto
-EsperandoFichaje --> FichadoSalida : fichar salida
-FichadoSalida --> EsperandoFichaje : registro correcto
-Autenticado --> Error : fallo servidor o token
-```
+stateDiagram-v2
+    [*] --> DesconectadoEmpleado
+
+    %% Login
+    DesconectadoEmpleado --> AutenticadoEmpleado : login correcto
+    DesconectadoEmpleado --> [*] : login incorrecto
+
+    %% Estados de fichaje
+    AutenticadoEmpleado --> EsperandoFichaje
+    EsperandoFichaje --> FichadoEntrada : fichar entrada
+    FichadoEntrada --> EsperandoFichaje : registro correcto
+    EsperandoFichaje --> FichadoSalida : fichar salida
+    FichadoSalida --> EsperandoFichaje : registro correcto
+
+    %% Consultas
+    EsperandoFichaje --> ConsultandoHistorico : consultar histórico
+    ConsultandoHistorico --> EsperandoFichaje : finalizar consulta
+
+    %% Errores
+    AutenticadoEmpleado --> ErrorEmpleado : fallo servidor o token inválido
+    FichadoEntrada --> ErrorEmpleado : fallo al registrar fichaje
+    FichadoSalida --> ErrorEmpleado : fallo al registrar fichaje
+    ConsultandoHistorico --> ErrorEmpleado : fallo al consultar datos
+  ```
+  #### 4.6.2 Admin
+```mermaid
+stateDiagram-v2
+    [*] --> DesconectadoAdmin
+
+    %% Login
+    DesconectadoAdmin --> AutenticadoAdmin : login correcto
+    DesconectadoAdmin --> [*] : login incorrecto
+
+    %% Panel administración
+    AutenticadoAdmin --> AdminPanel : acceso a panel admin
+    AdminPanel --> GestionUsuarios : gestionar usuarios
+    GestionUsuarios --> AdminPanel : volver al panel admin
+    AdminPanel --> ConsultarHistoricoGlobal : consultar histórico global
+    ConsultarHistoricoGlobal --> AdminPanel : finalizar consulta
+
+    %% Errores
+    AutenticadoAdmin --> ErrorAdmin : fallo servidor o token inválido
+    ConsultarHistoricoGlobal --> ErrorAdmin : fallo al consultar datos
+ ```
 
 ## 5. Desarrollo
 
