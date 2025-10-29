@@ -3,7 +3,7 @@
 ## 1. Estudio del problema y análisis del sistema
 
 ### 1.1 Introducción
-Work O’Clock es una solución para registrar la jornada laboral de los empleados mediante una **interfaz web React**, un **servidor Java con APIs REST** y una **base de datos MySQL**.
+Work O’Clock es una solución para registrar la jornada laboral de los empleados mediante una **interfaz web React**, un **servidor Java con Spring Boot y APIs REST** y una **base de datos MySQL**.
 
 ### 1.2 Finalidad
 - Registrar entrada y salida de empleados.  
@@ -246,6 +246,7 @@ stateDiagram-v2
 
 ### 5.2 Servidor (Java / Spring Boot)
 #### 5.2.1 Arquitectura básica
+#### 5.2.2 Arquitectura básica
 ```mermaid
 graph LR
     Front <--> |DTO| Controlador
@@ -315,7 +316,7 @@ graph LR
 - Carga (opcional): simulación de múltiples usuarios concurrentes.
 
 ## 7. Recursos de Software
-- server: Java 17, Spring Boot 3, Spring Data JPA, JWT.  
+- Servidor: Java 17, Spring Boot 3, Spring Data JPA, Spring Security, JWT.  
 - Frontend: React 18+, Axios, Redux/Context, React Router, Material-UI/Tailwind.  
 - Base de datos: MySQL 8.  
 - Testing: JUnit, Mockito, Jest, React Testing Library.  
@@ -334,9 +335,7 @@ graph LR
 - Backup automático de base de datos y monitorización de logs.  
 - Plan de pruebas de aceptación antes del despliegue final.
 
-## 10. Futuro
-
-## 11. Conclusión
+## 10. Conclusión
 Work O’Clock es un sistema escalable y seguro que integra **React**, **Java/Spring Boot** y **MySQL**, permitiendo a empleados y administradores gestionar la jornada laboral de manera eficiente.  
 El proyecto sigue buenas prácticas de arquitectura, seguridad, pruebas y documentación, garantizando su viabilidad y mantenimiento a largo plazo.
 
