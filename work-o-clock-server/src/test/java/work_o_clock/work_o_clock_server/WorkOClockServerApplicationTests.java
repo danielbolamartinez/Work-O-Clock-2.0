@@ -1,4 +1,4 @@
-package com.workoclock.work_o_clock_server;
+package work_o_clock.work_o_clock_server;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

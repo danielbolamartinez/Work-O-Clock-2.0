@@ -61,7 +61,7 @@ class Empleado {
     +String nombre
     +String apellidos
     +String email
-    +String contraseña_hashed
+    +String contraseña
     +Date fecha_alta
     +Boolean activo
     +List~Rol~ roles
@@ -240,13 +240,15 @@ stateDiagram-v2
 
 ## 5. Desarrollo
 
-### 5.1 Base de Datos
-- Base de datos MySQL: tablas **Usuarios**, **Roles**, **Fichajes**, **Auditoría**.  
-- Índices: `usuario_id` y `fecha_hora` para consultas rápidas.
+### 5.1 Interfaz React
+*(En construcción)*
+- Componentes: `LoginPage`, `FichajePage`, `HistoricoPage`, `AdminPage`, `NavBar`, `ProtectedRoute`.  
+- Axios para consumo de APIs, React Router para navegación, Context/Redux para estado global.  
+- Diseño responsivo, feedback de usuario con loaders y alertas.
 
 ### 5.2 Servidor (Java / Spring Boot)
+*(En construcción)*
 #### 5.2.1 Arquitectura básica
-#### 5.2.2 Arquitectura básica
 ```mermaid
 graph LR
     Front <--> |DTO| Controlador
@@ -259,28 +261,27 @@ graph LR
 - **Servicio**: Lógica de negocio. Sirve para mantener el control sobre operaciones complejas, reutilizar el código y separar la lógica del controlador, que solo recibe y devuelve datos.
 - **Repositorio**: Interfaz que se comunica directamente con la base de datos usando Hibernate/JPA. Encapsula operaciones CRUD y evita escribir SQL a mano. Spring Boot ya implementa estos métodos CRUD.  
 - **Modelo**: Clases Java que representan las tablas de la base de datos. Cada atributo de la clase corresponde a una columna. Hibernate (o JPA) convierte estas clases en registros de la base de datos y maneja la persistencia automáticamente.
-
 #### 5.2.2 Endpoints REST
-##### 1. Empleados
+##### 5.2.2.1 Empleados
 - **GET** `/empleados` : Listar todos los empleados  
 - **GET** `/empleados/{id}` : Obtener un empleado por ID  
 - **POST** `/empleados` : Crear un nuevo empleado  
 - **PUT** `/empleados/{id}` : Actualizar datos de un empleado  
 - **DELETE** `/empleados/{id}` : Desactivar o eliminar un empleado  
 
-##### 2. Empleados Roles
+##### 5.2.2.2 Empleados Roles
 - **GET** `/empleados/{id}/roles` : Listar roles de un empleado  
 - **POST** `/empleados/{id}/roles` : Asignar uno o varios roles a un empleado  
 - **DELETE** `/empleados/{id}/roles/{rol_id}` : Quitar un rol a un empleado  
 
-##### 3. Roles
+##### 5.2.2.3 Roles
 - **GET** `/roles` : Listar todos los roles  
 - **GET** `/roles/{id}` : Obtener un rol por ID  
 - **POST** `/roles` : Crear un nuevo rol  
 - **PUT** `/roles/{id}` : Actualizar un rol  
 - **DELETE** `/roles/{id}` : Eliminar un rol  
 
-##### 4. Jornadas
+##### 5.2.2.4 Jornadas
 - **GET** `/jornadas` : Listar todas las jornadas  
 - **GET** `/jornadas/{id}` : Obtener jornada por ID  
 - **GET** `/empleados/{id}/jornadas` : Obtener jornadas de un empleado  
@@ -288,25 +289,26 @@ graph LR
 - **PUT** `/jornadas/{id}` : Actualizar jornada  
 - **DELETE** `/jornadas/{id}` : Eliminar jornada  
 
-##### 5. Fichajes
+##### 5.2.2.5 Fichajes
 - **GET** `/fichajes` : Listar todos los fichajes  
 - **GET** `/fichajes/{id}` : Obtener un fichaje por ID  
 - **GET** `/empleados/{id}/fichajes` : Listar fichajes de un empleado  
 - **GET** `/empleados/{id}/fichajes/ultimo` : Obtener último fichaje de un empleado  
 - **POST** `/fichajes` : Registrar un fichaje (entrada/salida)  
 
-##### 6. Auditorías
+##### 5.2.2.6 Auditorías
 - **GET** `/auditorias` : Listar todas las auditorías  
 - **GET** `/auditorias/{id}` : Obtener una auditoría por ID  
 - **GET** `/empleados/{id}/auditorias` : Listar auditorías de un empleado  
 - **POST** `/auditorias` : Registrar una acción de auditoría
 
+#### 5.2.3 Autenticación y JWT
+ *(En construcción)*
 
-
-### 5.3 Interfaz React
-- Componentes: `LoginPage`, `FichajePage`, `HistoricoPage`, `AdminPage`, `NavBar`, `ProtectedRoute`.  
-- Axios para consumo de APIs, React Router para navegación, Context/Redux para estado global.  
-- Diseño responsivo, feedback de usuario con loaders y alertas.
+### 5.3 Base de Datos
+*(En construcción)*
+- Base de datos MySQL: tablas **Usuarios**, **Roles**, **Fichajes**, **Auditoría**.  
+- Índices: `usuario_id` y `fecha_hora` para consultas rápidas.
 
 ## 6. Pruebas
 - Unitarias: server (JUnit + Mockito), frontend (Jest + React Testing Library).  

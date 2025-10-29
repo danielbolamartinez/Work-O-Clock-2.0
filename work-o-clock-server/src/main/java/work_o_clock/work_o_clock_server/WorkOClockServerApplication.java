@@ -1,4 +1,4 @@
-package com.workoclock.work_o_clock_server;
+package work_o_clock.work_o_clock_server;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -8,7 +8,6 @@ public class WorkOClockServerApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(WorkOClockServerApplication.class, args);
-                System.out.println("Hola mundo");
 	}
 
 }

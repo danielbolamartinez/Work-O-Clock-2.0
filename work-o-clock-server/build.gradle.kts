@@ -4,9 +4,9 @@ plugins {
 	id("io.spring.dependency-management") version "1.1.7"
 }
 
-group = "com.workoclock"
+group = "work-o-clock"
 version = "0.0.1-SNAPSHOT"
-description = "Work O'Clock Server"
+description = "Servidor de Work O'Clock 2.0"
 
 java {
 	toolchain {
@@ -25,26 +25,22 @@ repositories {
 }
 
 dependencies {
-    //Spring boot starters
-	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-	implementation("org.springframework.boot:spring-boot-starter-security")
-	implementation("org.springframework.boot:spring-boot-starter-web")
-    
-    //JWT
-        implementation("io.jsonwebtoken:jjwt-api:0.11.5")
-        runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
-        runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5") // soporte JSON con Jackson
-    
-    //Lombok
+	// --- Core Spring ---
+        implementation("org.springframework.boot:spring-boot-starter-web")
+        implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+        implementation("org.springframework.boot:spring-boot-starter-security")
+    // --- Database ---
+        runtimeOnly("com.mysql:mysql-connector-j")
+    // --- Utilidades ---
         compileOnly("org.projectlombok:lombok")
         annotationProcessor("org.projectlombok:lombok")
-
-//MySQL
-	runtimeOnly("com.mysql:mysql-connector-j")
-	
-//Testing
-	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testImplementation("org.springframework.security:spring-security-test")
+    // --- JWT (opcional, para autenticación sin estado) ---
+        implementation("io.jsonwebtoken:jjwt-api:0.11.5")
+        runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
+        runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
+    // --- Testing ---
+        testImplementation("org.springframework.boot:spring-boot-starter-test")
+        testImplementation("org.springframework.security:spring-security-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
