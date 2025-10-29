@@ -46,36 +46,14 @@ Work O’Clock es una solución para registrar la jornada laboral de los emple
 - Diseño responsivo, Material-UI/Tailwind.
 
 ### 4.2 Base de Datos
-- **Usuarios**: id, nombre, email, contraseña_hashed, rol_id  
-- **Roles**: rol_id, nombre_rol, permisos  
-- **Fichajes**: fichaje_id, usuario_id, tipo_fichaje, fecha_hora  
-- **Auditoría**: log_id, usuario_id, acción, fecha_hora
+- **Usuarios**: id, nombre, apelidos, email, contraseña(hasheada), fecha alta, activo  
+- **Roles**: Id, nombre, descripción
+- **Empleados_Roles**: Empleado_id, rol_id
+- **Jornada**: id, empleado_id, hora_inicio, hora_fin, días_semana
+- **Fichajes**: id, empleado_id, tipo, fichaje, latitud, longitud  
+- **Auditoría**: log_id, empleado_id, acción, fecha_hora
 
-### 4.3 Casos de Uso
-```mermaid
-graph TD
-    %% Actores
-    Empleado[Empleado]
-    Administrador[Administrador]
-
-    %% Casos de uso empleados
-    Empleado -->|Usa| LoginEmpleado[Login]
-    Empleado -->|Usa| FicharEntrada[Fichar Entrada]
-    Empleado -->|Usa| FicharSalida[Fichar Salida]
-    Empleado -->|Usa| ConsultarHistorico[Consultar Histórico]
-
-    %% Casos de uso administrador
-    Administrador -->|Usa| LoginAdmin[Login]
-    Administrador -->|Usa| GestionUsuarios[Gestionar Usuarios]
-    Administrador -->|Usa| ConsultarHistoricoGlobal[Consultar Histórico Global]
-
-    %% Flujo condicional
-    LoginEmpleado -->|Incorrecto| ErrorLogin[Login Fallido]
-    LoginAdmin -->|Incorrecto| ErrorLogin
-
-```
-
-### 4.4 Diagrama de Clases
+### 4.3 Diagrama de Clases
 ```mermaid
 classDiagram
 class Empleado {
@@ -122,7 +100,7 @@ class Fichaje {
 }
 
 class Auditoria {
-    +int id
+    +int log_id
     +Empleado empleado
     +String accion
     +String descripcion
@@ -139,6 +117,31 @@ Empleado_Rol --> Empleado
 Empleado_Rol --> Rol
 
 ```
+### 4.4 Casos de Uso
+```mermaid
+graph TD
+    %% Actores
+    Empleado[Empleado]
+    Administrador[Administrador]
+
+    %% Casos de uso empleados
+    Empleado -->|Usa| LoginEmpleado[Login]
+    Empleado -->|Usa| FicharEntrada[Fichar Entrada]
+    Empleado -->|Usa| FicharSalida[Fichar Salida]
+    Empleado -->|Usa| ConsultarHistorico[Consultar Histórico]
+
+    %% Casos de uso administrador
+    Administrador -->|Usa| LoginAdmin[Login]
+    Administrador -->|Usa| GestionUsuarios[Gestionar Usuarios]
+    Administrador -->|Usa| ConsultarHistoricoGlobal[Consultar Histórico Global]
+
+    %% Flujo condicional
+    LoginEmpleado -->|Incorrecto| ErrorLogin[Login Fallido]
+    LoginAdmin -->|Incorrecto| ErrorLogin
+
+```
+
+
 
 ### 4.5 Diagrama de Secuencia: Fichaje
 #### 4.5.1 Login
@@ -242,8 +245,62 @@ stateDiagram-v2
 - Índices: `usuario_id` y `fecha_hora` para consultas rápidas.
 
 ### 5.2 Servidor (Java / Spring Boot)
-- Endpoints REST, seguridad, servicios de negocio y repositorios.
-- Diagramas: secuencia y clases incluidos.
+#### 5.2.1 Arquitectura básica
+```mermaid
+graph LR
+    Front <--> |DTO| Controlador
+    Controlador <--> Servicio
+    Servicio <--> Repositorio
+    Repositorio <--> Modelo
+```
+- **DTO**: Objetos que intercambias con el front. Evita exponer directamente las entidades del modelo y permite: Validaciones, transformaciones y evita que el front vea campos sensibles.
+- **Controlador**: Exposición de los endpoints REST que el front va a consumir. Maneja las utilidades HTTP (Get, Post, Put, Del), llama al servicio para ejecutar la lógica y devuelve DTOs al front.
+- **Servicio**: Lógica de negocio. Sirve para mantener el control sobre operaciones complejas, reutilizar el código y separar la lógica del controlador, que solo recibe y devuelve datos.
+- **Repositorio**: Interfaz que se comunica directamente con la base de datos usando Hibernate/JPA. Encapsula operaciones CRUD y evita escribir SQL a mano. Spring Boot ya implementa estos métodos CRUD.  
+- **Modelo**: Clases Java que representan las tablas de la base de datos. Cada atributo de la clase corresponde a una columna. Hibernate (o JPA) convierte estas clases en registros de la base de datos y maneja la persistencia automáticamente.
+
+#### 5.2.2 Endpoints REST
+##### 1. Empleados
+- **GET** `/empleados` : Listar todos los empleados  
+- **GET** `/empleados/{id}` : Obtener un empleado por ID  
+- **POST** `/empleados` : Crear un nuevo empleado  
+- **PUT** `/empleados/{id}` : Actualizar datos de un empleado  
+- **DELETE** `/empleados/{id}` : Desactivar o eliminar un empleado  
+
+##### 2. Empleados Roles
+- **GET** `/empleados/{id}/roles` : Listar roles de un empleado  
+- **POST** `/empleados/{id}/roles` : Asignar uno o varios roles a un empleado  
+- **DELETE** `/empleados/{id}/roles/{rol_id}` : Quitar un rol a un empleado  
+
+##### 3. Roles
+- **GET** `/roles` : Listar todos los roles  
+- **GET** `/roles/{id}` : Obtener un rol por ID  
+- **POST** `/roles` : Crear un nuevo rol  
+- **PUT** `/roles/{id}` : Actualizar un rol  
+- **DELETE** `/roles/{id}` : Eliminar un rol  
+
+##### 4. Jornadas
+- **GET** `/jornadas` : Listar todas las jornadas  
+- **GET** `/jornadas/{id}` : Obtener jornada por ID  
+- **GET** `/empleados/{id}/jornadas` : Obtener jornadas de un empleado  
+- **POST** `/jornadas` : Crear una nueva jornada  
+- **PUT** `/jornadas/{id}` : Actualizar jornada  
+- **DELETE** `/jornadas/{id}` : Eliminar jornada  
+
+##### 5. Fichajes
+- **GET** `/fichajes` : Listar todos los fichajes  
+- **GET** `/fichajes/{id}` : Obtener un fichaje por ID  
+- **GET** `/empleados/{id}/fichajes` : Listar fichajes de un empleado  
+- **GET** `/empleados/{id}/fichajes/ultimo` : Obtener último fichaje de un empleado  
+- **POST** `/fichajes` : Registrar un fichaje (entrada/salida)  
+
+##### 6. Auditorías
+- **GET** `/auditorias` : Listar todas las auditorías  
+- **GET** `/auditorias/{id}` : Obtener una auditoría por ID  
+- **GET** `/empleados/{id}/auditorias` : Listar auditorías de un empleado  
+- **POST** `/auditorias` : Registrar una acción de auditoría
+
+
 
 ### 5.3 Interfaz React
 - Componentes: `LoginPage`, `FichajePage`, `HistoricoPage`, `AdminPage`, `NavBar`, `ProtectedRoute`.  
@@ -277,7 +334,9 @@ stateDiagram-v2
 - Backup automático de base de datos y monitorización de logs.  
 - Plan de pruebas de aceptación antes del despliegue final.
 
-## 10. Conclusión
+## 10. Futuro
+
+## 11. Conclusión
 Work O’Clock es un sistema escalable y seguro que integra **React**, **Java/Spring Boot** y **MySQL**, permitiendo a empleados y administradores gestionar la jornada laboral de manera eficiente.  
 El proyecto sigue buenas prácticas de arquitectura, seguridad, pruebas y documentación, garantizando su viabilidad y mantenimiento a largo plazo.
 
