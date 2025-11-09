@@ -5,6 +5,7 @@
  * Clases principales:
  * - EmpleadoRepository
  * - RolRepository
+ * - JornadaRepository
  * - FichajeRepository
  * - AuditoriaRepository
  */

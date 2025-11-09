@@ -4,10 +4,15 @@
  */
 package repository;
 
-/**
- *
- * @author USER
- */
-public class AuditoriaRepository {
-    
+import entity.Auditoria;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import java.util.List;
+import java.util.Date;
+
+@Repository
+public interface AuditoriaRepository extends JpaRepository<Auditoria, Integer> {
+    List<Auditoria> findByEmpleadoId(int empleadoId);
+    List<Auditoria> findByFechaBetween(Date inicio, Date fin);
 }
+

@@ -4,10 +4,14 @@
  */
 package repository;
 
-/**
- *
- * @author USER
- */
-public class EmpleadoRepository {
-    
+import entity.Empleado;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import java.util.Optional;
+import java.util.List;
+
+@Repository
+public interface EmpleadoRepository extends JpaRepository<Empleado, Integer> {
+    Optional<Empleado> findByEmail(String email); // Para login
+    List<Empleado> findByActivo(Boolean activo);  // Filtrar activos/inactivos
 }
