@@ -318,9 +318,9 @@ graph LR
 - Carga (opcional): simulación de múltiples usuarios concurrentes.
 
 ## 7. Recursos de Software
-- Servidor: Java 17, Spring Boot 3, Spring Data JPA, Spring Security, JWT.  
+- Servidor: Java 17, Spring Boot 3, Spring Data JPA, Spring Security, JWT, Hibernate, JSON.  
 - Frontend: React 18+, Axios, Redux/Context, React Router, Material-UI/Tailwind.  
-- Base de datos: MySQL 8.  
+- Base de datos: MySQL 8.
 - Testing: JUnit, Mockito, Jest, React Testing Library.  
 - Documentación: Swagger/OpenAPI.  
 - Control de versiones: Git.
